@@ -1,8 +1,8 @@
 ﻿Multiframe to Multiframe Network for Video Denoising
 =====================================================
-The comlete training code and pretrained model is coming soon!
+The comlete training code and pretrained model are coming soon!
 ---------------------------------------------------------------
-#### This project are implemented using Pytorch and tested on V1.4.0
+#### This project is implemented using Pytorch and tested on V1.4.0
 
 ## dataset:
 

@@ -9,10 +9,6 @@ class Net(nn.Module):
     def __init__(self, in_channel=3, out_channel=3, nf=64):
         super(Net, self).__init__()
         self.in_channel = in_channel
-        self.input = nn.Sequential(
-            nn.Conv3d(in_channels=in_channel, out_channels=nf, kernel_size=(1,3,3), stride=1, padding=(0,1,1), bias=False),
-            nn.LeakyReLU(negative_slope=0.1, inplace=True)
-        )
         self.spatiotemporal_feature = spatiotemporal_denoising(filter_in=64,filter_out=64,groups=1)
         self.spatial_feature = spatial_denoising(filter_in=64,filter_out=64,groups=1)
         self.esimator = merging_module(filter_in=64,filter_out=64,groups=1)
@@ -20,9 +16,8 @@ class Net(nn.Module):
     def forward(self, x):
         N,C,L,H,W = x.size()
         residual=x
-        out = self.input(x)
-        out1 = self.spatiotemporal_feature(out,[N,C,L,H,W])
-        out2 = self.spatial_feature(out,[N,C,L,H,W])
+        out1 = self.spatiotemporal_feature(x,[N,C,L,H,W])
+        out2 = self.spatial_feature(x,[N,C,L,H,W])
         out3 = torch.cat((out1,out2),1)
         out = self.esimator (out3)
         out = torch.add(out, residual)
@@ -131,6 +126,10 @@ class Seq_conv_tail_ST(nn.Module):
 class spatiotemporal_denoising(nn.Module):
      def __init__(self, filter_in=64,filter_out=64,groups=1):
         super(spatiotemporal_denoising, self).__init__()
+        self.input_data = nn.Sequential(
+            nn.Conv3d(in_channels=3, out_channels=64, kernel_size=(1,3,3), stride=1, padding=(0,1,1), bias=False),
+            nn.LeakyReLU(negative_slope=0.1, inplace=True))
+		
         self.seqconv1=Seq_conv_ST(filter_in=64,filter_out=64, concat_filter=filter_in, groups=groups)
 
         self.down_sampling1=down_sample(filter_in=64,filter_out=64,groups=1)
@@ -163,7 +162,10 @@ class spatiotemporal_denoising(nn.Module):
         
         N,C,L,H,W=shape
 
-        conc1 = self.seqconv1(input)
+        input_ = self.input_data(input)
+		
+		
+        conc1 = self.seqconv1(input_)
 
         out = self.down_sampling1(conc1, [N,C,L,H,W])
 
@@ -202,6 +204,11 @@ class spatiotemporal_denoising(nn.Module):
 class spatial_denoising(nn.Module):
      def __init__(self, filter_in=64,filter_out=64,groups=1):
         super(spatial_denoising, self).__init__()
+        self.input_data = nn.Sequential(
+            nn.Conv3d(in_channels=3, out_channels=64, kernel_size=(1,3,3), stride=1, padding=(0,1,1), bias=False),
+            nn.LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+		
         self.seqconv1=Seq_conv(filter_in=64,filter_out=64, concat_filter=filter_in, groups=groups)
 
         self.down_sampling1=down_sample(filter_in=64,filter_out=64,groups=1)
@@ -234,7 +241,9 @@ class spatial_denoising(nn.Module):
         
         N,C,L,H,W=shape
 
-        conc1 = self.seqconv1(input)
+        input_ = self.input_data(input)
+		
+        conc1 = self.seqconv1(input_)
 
         out = self.down_sampling1(conc1, [N,C,L,H,W])
 
