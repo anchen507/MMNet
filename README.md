@@ -1,7 +1,6 @@
 ﻿Multiframe to Multiframe Network for Video Denoising
 =====================================================
-The comlete training code and pretrained model are coming soon!
----------------------------------------------------------------
+
 #### This project is implemented using Pytorch and tested on V1.4.0
 
 ## dataset:
@@ -16,10 +15,8 @@ download from: Vimeo-90K (https://github.com/anchen1011/toflow) and CVRD( https:
 
 ## Training:
 #### python train.py 
-#### (update soon)
 
 ## Pretrained model
-#### update soon
 
 
 ## References:
